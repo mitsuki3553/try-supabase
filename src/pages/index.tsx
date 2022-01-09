@@ -10,6 +10,13 @@ type Props = {
   children: ReactNode;
 };
 
+type Profile = {
+  avatar_url: string;
+  id: string;
+  updated_at: Date;
+  username: string;
+};
+
 const getProfile = async () => {
   const { data, error } = await supabase.from("profiles").select("*");
 
@@ -21,17 +28,21 @@ const getProfile = async () => {
 
 const Container = () => {
   const { user } = Auth.useUser();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async () => {
-      setData(getProfile());
-    };
-    setIsLoading(false);
-  }, []);
+    if(user){
+      const fetchData = async()=>{
+        const data = await getProfile();
+        setData(data?.shift());
+        setIsLoading(false);
+      };
+      fetchData();
+    }
+  }, [user]);
+  
   // ログインしている場合
-
   if (user) {
     return (
       <>
