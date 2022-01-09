@@ -1,46 +1,73 @@
+import { ReactNode, useEffect, useState } from "react";
+
 import { Auth, Button, IconLogOut } from "@supabase/ui";
-import type { ReactNode } from "react";
-import React from "react";
+
+import { supabase } from "src/libs/supabase";
 import { LayoutWrapper } from "src/components/layoutWrapper";
-import { client } from "src/libs/supabase";
+import { InputProfile } from "src/components/modal_contents/input_profile";
+
 type Props = {
   children: ReactNode;
 };
+
+const getProfile = async () => {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    
+  if (!error && data) {
+    return data;
+  }
+  return null;
+};
+
 const Container = (props: Props) => {
   const { user } = Auth.useUser();
+  const [ data,setData ] = useState<any>(null);
+  const [ isLoading, setIsLoading] = useState(true);
+
+
+  useEffect(()=>{
+    async()=>{
+      setData(getProfile());
+    }
+    setIsLoading(false);
+  }  ,[]);
   // ログインしている場合
+
   if (user) {
     return (
-      <div>
-        <div className="flex justify-end mx-2 my-4">
+          <>
           <Button
             size="medium"
             icon={<IconLogOut />}
-            onClick={() => client.auth.signOut()}
+            onClick={() => supabase.auth.signOut()}
           >
             Sign out
           </Button>
-        </div>
-      </div>
+          {!isLoading && !data && <InputProfile uuid={user.id}/>}
+          </>
     );
   }
   // ログインしていない場合
-  return <>{props.children}</>;
+  return (
+    <div className="flex justify-center pt-8">
+      <div className="w-full sm:w-96">
+        <Auth
+          supabaseClient={supabase}
+          providers={["github"]}
+          socialColors={true}
+        />
+      </div>
+    </div>
+  );
 };
+
 const Home = () => {
   return (
     <LayoutWrapper>
-      <Auth.UserContextProvider supabaseClient={client}>
+      <Auth.UserContextProvider supabaseClient={supabase}>
         <Container>
-          <div className="flex justify-center pt-8">
-            <div className="w-full sm:w-96">
-              <Auth
-                supabaseClient={client}
-                providers={["github"]}
-                socialColors={true}
-              />
-            </div>
-          </div>
         </Container>
       </Auth.UserContextProvider>
     </LayoutWrapper>

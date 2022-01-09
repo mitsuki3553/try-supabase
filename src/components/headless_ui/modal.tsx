@@ -1,18 +1,21 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, ReactNode, useState } from "react";
 
-export const Modal = ()=> {
-  let [isOpen, setIsOpen] = useState(true);
+type Props = {
+  children: ReactNode;
+  title: string;
+  isOpen: boolean;
+  closeModal:()=>void;
+};
 
-  const closeModal = () => setIsOpen(false);
-
+export const Modal = (props:Props)=> {
   return (
     <>
-      <Transition appear show={isOpen} as={Fragment}>
+      <Transition appear show={props.isOpen} as={Fragment}>
         <Dialog
           as="div"
           className="fixed inset-0 z-10 overflow-y-auto"
-          onClose={closeModal}
+          onClose={props.closeModal}
         >
           <div className="min-h-screen px-4 text-center">
             <Transition.Child
@@ -48,17 +51,9 @@ export const Modal = ()=> {
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900"
                 >
-                  モーダルのタイトル
+                  {props.title}
                 </Dialog.Title>
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                    onClick={closeModal}
-                  >
-                    登録！
-                  </button>
-                </div>
+                {props.children}
               </div>
             </Transition.Child>
           </div>
