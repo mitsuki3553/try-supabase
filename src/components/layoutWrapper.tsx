@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { Toaster } from "react-hot-toast";
+
 import { Footer } from "src/components/footer";
 import { Header } from "src/components/header";
 type Props = {
@@ -17,6 +19,7 @@ export const LayoutWrapper = (props: Props) => {
         </main>
         <Footer />
       </div>
+      <Toaster/>
     </div>
   );
 };

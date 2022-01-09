@@ -1,14 +1,14 @@
+import { Fragment, ReactNode } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, ReactNode, useState } from "react";
 
 type Props = {
   children: ReactNode;
   title: string;
   isOpen: boolean;
-  closeModal:()=>void;
+  closeModal: () => void;
 };
 
-export const Modal = (props:Props)=> {
+export const Modal = (props: Props) => {
   return (
     <>
       <Transition appear show={props.isOpen} as={Fragment}>
@@ -61,4 +61,4 @@ export const Modal = (props:Props)=> {
       </Transition>
     </>
   );
-}
+};

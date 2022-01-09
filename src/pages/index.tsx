@@ -11,42 +11,39 @@ type Props = {
 };
 
 const getProfile = async () => {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    
+  const { data, error } = await supabase.from("profiles").select("*");
+
   if (!error && data) {
     return data;
   }
   return null;
 };
 
-const Container = (props: Props) => {
+const Container = () => {
   const { user } = Auth.useUser();
-  const [ data,setData ] = useState<any>(null);
-  const [ isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-
-  useEffect(()=>{
-    async()=>{
+  useEffect(() => {
+    async () => {
       setData(getProfile());
-    }
+    };
     setIsLoading(false);
-  }  ,[]);
+  }, []);
   // ログインしている場合
 
   if (user) {
     return (
-          <>
-          <Button
-            size="medium"
-            icon={<IconLogOut />}
-            onClick={() => supabase.auth.signOut()}
-          >
-            Sign out
-          </Button>
-          {!isLoading && !data && <InputProfile uuid={user.id}/>}
-          </>
+      <>
+        <Button
+          size="medium"
+          icon={<IconLogOut />}
+          onClick={() => supabase.auth.signOut()}
+        >
+          Sign out
+        </Button>
+        {!isLoading && !data && <InputProfile uuid={user.id} />}
+      </>
     );
   }
   // ログインしていない場合
@@ -67,8 +64,7 @@ const Home = () => {
   return (
     <LayoutWrapper>
       <Auth.UserContextProvider supabaseClient={supabase}>
-        <Container>
-        </Container>
+        <Container />
       </Auth.UserContextProvider>
     </LayoutWrapper>
   );
