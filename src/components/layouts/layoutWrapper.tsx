@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
-import { Footer } from "src/components/footer";
-import { Header } from "src/components/header";
+import { Footer } from "src/components/layouts/footer";
+import { Header } from "src/components/layouts/header";
+import { Tabs } from "src/components/headless_ui/tabs";
 type Props = {
   children: ReactNode;
 };
@@ -14,12 +15,13 @@ export const LayoutWrapper = (props: Props) => {
         grid-rows-[auto,1fr,auto] min-h-screen"
       >
         <Header />
-        <main className="px-4 text-gray-600 bg-gray-100">
-          <div>{props.children}</div>
+        <main>
+          <Tabs />
+          <div className="px-4 text-gray-600 bg-gray-100">{props.children}</div>
         </main>
         <Footer />
       </div>
-      <Toaster/>
+      <Toaster />
     </div>
   );
 };
