@@ -8,7 +8,7 @@ import { Modal } from "src/components/headless_ui/modal";
 const insertProfile = async (username: string, uuid: string) => {
   const { error } = await supabase
     .from("profiles")
-    .insert([{ username, id: uuid ,updated_at:new Date()}]);
+    .insert([{ username, id: uuid, updated_at: new Date() }]);
 
   if (error) {
     toast.error(error.message);
@@ -23,7 +23,6 @@ export const InputProfile = (props: Props) => {
   const { register, handleSubmit } = useForm<UseFormRegisterReturn>({
     mode: "onSubmit",
     reValidateMode: "onChange",
-    defaultValues: {},
     criteriaMode: "firstError",
   });
   const [isOpen, setIsOpen] = useState(true);
@@ -36,7 +35,11 @@ export const InputProfile = (props: Props) => {
 
   return (
     <>
-      <Modal title="ユーザープロフィール" isOpen={isOpen} closeModal={closeModal}>
+      <Modal
+        title="ユーザープロフィール"
+        isOpen={isOpen}
+        closeModal={closeModal}
+      >
         <form onSubmit={handleSubmit(handleProfileSubmit)}>
           <div>名前：</div>
           <input {...register("name", { required: true })} />
