@@ -5,7 +5,11 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "src/libs/supabase";
 import { InputProfile } from "src/components/modal_contents/input_profile";
-import { getPosts, getProfile, postPost } from "src/components/functions/supabase";
+import {
+  getPosts,
+  getProfile,
+  postPost,
+} from "src/components/functions/supabase";
 
 type Props = {
   children: ReactNode;
@@ -18,13 +22,14 @@ type Profile = {
   username: string;
 };
 
-type Post = {
+type PostsWithProfile = {
   user_id: string;
   post_id: string;
   posts: string;
   created_at: Date;
   updated_at: Date;
   public: boolean;
+  profiles: Profile;
 };
 
 export default function Home() {
@@ -35,14 +40,14 @@ export default function Home() {
     reValidateMode: "onChange",
   });
 
-    const [profile, setProfile] = useState<Profile | null>(null);
-    const [posts, setPosts] = useState<Post[] | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+  const [profile, setProfile] = useState<Profile | undefined>(undefined);
+  const [posts, setPosts] = useState<PostsWithProfile[] | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (session) {
       const fetchData = async () => {
-        const fetchedProfile = await getProfile();
+        const fetchedProfile = await getProfile(session.user!.id);
         const posts = await getPosts();
         setPosts(posts);
         setProfile(fetchedProfile?.shift());
@@ -54,6 +59,7 @@ export default function Home() {
       replace("/signin");
     }
   }, [session]);
+  console.log({ isLoading, profile });
 
   return (
     <div className="h-screen flex center items-center justify-center">
@@ -61,7 +67,9 @@ export default function Home() {
         <h2>ログイン中</h2>
         <form
           className="mt-2"
-          onSubmit={handleSubmit((data) => postPost(data.post, session?.user?.id!))}
+          onSubmit={handleSubmit((data) =>
+            postPost(data.post, session?.user?.id!)
+          )}
         >
           <textarea
             placeholder="ここで投稿してね！"
@@ -76,8 +84,14 @@ export default function Home() {
           {posts?.map((post) => {
             return (
               <div key={post.post_id} className="border">
-                <p>{post.created_at}</p>
-                <p>{post.posts}</p>
+                <h1 className="font-bold">
+                  {post.profiles.username}
+                  <span className="text-right block">
+                    {post.created_at}
+                  </span>
+                </h1>
+
+                <p className="border border-black rounded">{post.posts}</p>
                 <form>
                   <Button role="submit">コメント</Button>
                 </form>
@@ -90,7 +104,7 @@ export default function Home() {
         <Button
           block
           onClick={() => {
-            supabase.auth.signOut()
+            supabase.auth.signOut();
             replace("/");
           }}
         >

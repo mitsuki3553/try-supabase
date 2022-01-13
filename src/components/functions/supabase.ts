@@ -1,25 +1,36 @@
 import toast from "react-hot-toast";
 import { supabase } from "src/libs/supabase";
 
-type Post = {
+type Profile = {
+  avatar_url: string;
+  id: string;
+  updated_at: Date;
+  username: string;
+};
+
+type PostsWithProfile = {
   user_id: string;
   post_id: string;
   posts: string;
   created_at: Date;
   updated_at: Date;
   public: boolean;
+  profiles: Profile;
 };
 
-
-//ユーザー情報をGETする
-export const getProfile = async () => {
-  const { data, error } = await supabase.from("profiles").select("*");
+//ログインユーザー情報をGETする
+export const getProfile = async (id: string) => {
+  const { data, error } = await supabase
+    .from<Profile>("profiles")
+    .select("*")
+    .eq("id", id);
 
   if (!error && data) {
     return data;
   }
   return null;
 };
+
 //投稿をPOSTする
 export const postPost = async (post: string, uuid: string) => {
   const { error } = await supabase.from("post_table").insert([
@@ -31,16 +42,21 @@ export const postPost = async (post: string, uuid: string) => {
       public: true,
     },
   ]);
+  console.log(error);
+
   if (error) toast.error(error.message);
 };
 
 //投稿をGETする
 export const getPosts = async () => {
-  const { data, error } = await supabase.from("post_table").select("*");
+  const { data, error } = await supabase
+    .from<PostsWithProfile>("post_table")
+    .select("*,profiles!inner(*)");
   console.log(data);
+  console.log(error);
 
   if (!error && data) {
-    return data as Post[];
+    return data;
   }
   return null;
 };
