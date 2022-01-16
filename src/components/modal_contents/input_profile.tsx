@@ -8,7 +8,7 @@ import { Modal } from "src/components/headless_ui/modal";
 const insertProfile = async (username: string, uuid: string) => {
   const { error } = await supabase
     .from("profiles")
-    .insert([{ username, id: uuid, updated_at: new Date() }]);
+    .insert([{ username, id: uuid, created_at: new Date() }]);
 
   if (error) {
     toast.error(error.message);
