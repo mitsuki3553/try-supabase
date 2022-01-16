@@ -10,7 +10,7 @@ export const Header = () => {
       </Link> */}
       <Link href="/">
         <a className="text-4xl text-center">
-          <h1 className="pt-2 m-2">つぶやくやつ(仮)</h1>
+          <h1 className="pt-2 m-2">Post Next</h1>
         </a>
       </Link>
     </header>
