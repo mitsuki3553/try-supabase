@@ -3,9 +3,14 @@ import { useRouter } from "next/router";
 import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "src/libs/supabase";
-import { convertDate } from "./functions/convertDate";
-import { getPosts, getProfile, postPost } from "./functions/supabase";
-import { InputProfile } from "./modal_contents/input_profile";
+import { convertDate } from "src/components/functions/convertDate";
+import {
+  deletePosts,
+  getPosts,
+  getProfile,
+  postPost,
+} from "src/components/functions/supabase";
+import { InputProfile } from "src/components/modal_contents/input_profile";
 
 type Props = {
   children: ReactNode;
@@ -45,7 +50,7 @@ export const Public = () => {
       const fetchData = async () => {
         const fetchedProfile = await getProfile(session.user!.id);
         const posts = await getPosts();
-        setPosts(posts);
+        posts && setPosts(posts.reverse());
         setProfile(fetchedProfile?.shift());
         setIsLoading(false);
       };
@@ -54,6 +59,7 @@ export const Public = () => {
       //localstrageにログイン情報がなければログイン画面へ
       replace("/signin");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
   //投稿したときの処理
@@ -61,8 +67,18 @@ export const Public = () => {
     setIsLoading(true);
     await postPost(data.post, session?.user?.id!);
     const posts = await getPosts();
-    setPosts(posts);
+    posts && setPosts(posts.reverse());
     setValue("post", "");
+    setIsLoading(false);
+  };
+
+  //削除したときの処理
+  const handleDelete = async (user_id: string, post_id: string) => {
+    setIsLoading(true);
+    await deletePosts(user_id, post_id);
+    const posts = await getPosts();
+    posts && setPosts(posts.reverse());
+
     setIsLoading(false);
   };
 
@@ -80,7 +96,7 @@ export const Public = () => {
           </Button>
         </form>
         <div className="flex flex-col my-4">
-          {posts?.reverse().map((post) => {
+          {posts?.map((post) => {
             return (
               <div key={post.post_id} className="border mt-2 bg-purple-200">
                 <p className="bg-purple-100 rounded p-4">{post.posts}</p>
@@ -92,6 +108,17 @@ export const Public = () => {
                   </p>
                 </div>
                 <Button>コメント</Button>
+                {post.user_id === session!.user!.id && (
+                  <Button
+                    onClick={() => {
+                      handleDelete(post.user_id, post.post_id);
+                    }}
+                    className="mx-2"
+                    danger
+                  >
+                    削除
+                  </Button>
+                )}
               </div>
             );
           })}

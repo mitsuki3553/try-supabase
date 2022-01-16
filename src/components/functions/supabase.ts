@@ -42,9 +42,8 @@ export const postPost = async (post: string, uuid: string) => {
       public: true,
     },
   ]);
-  console.log(error);
 
-  if (error) toast.error(error.message);
+  error ? toast.error("保存に失敗しました…") : toast("保存しました！！");
 };
 
 //投稿をGETする
@@ -52,11 +51,20 @@ export const getPosts = async () => {
   const { data, error } = await supabase
     .from<PostsWithProfile>("post_table")
     .select("*,profiles!inner(*)");
-  console.log(data);
-  console.log(error);
 
   if (!error && data) {
     return data;
   }
+  error && toast.error("情報取得に失敗しました…");
   return null;
+};
+
+//投稿を削除する
+export const deletePosts = async (user_id: string, post_id: string) => {
+  const { data, error } = await supabase
+    .from("post_table")
+    .delete()
+    .match({ user_id: user_id, post_id: post_id });
+
+  error ? toast.error("削除に失敗しました…") : toast("削除しました！！");
 };
