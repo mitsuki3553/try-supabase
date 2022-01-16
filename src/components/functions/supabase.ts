@@ -4,7 +4,7 @@ import { supabase } from "src/libs/supabase";
 type Profile = {
   avatar_url: string;
   id: string;
-  updated_at: Date;
+  updated_at: string;
   username: string;
 };
 
@@ -12,8 +12,8 @@ type PostsWithProfile = {
   user_id: string;
   post_id: string;
   posts: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: string;
+  updated_at: string;
   public: boolean;
   profiles: Profile;
 };
