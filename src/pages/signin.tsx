@@ -1,17 +1,18 @@
-import { Button, IconKey, IconMail } from "@supabase/ui";
-import { useForm, Controller } from "react-hook-form";
-import { Input } from "@supabase/ui";
-import { supabase } from "src/libs/supabase";
-import Link from "next/link";
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/router";
+import { Input,Button, IconKey, IconMail } from "@supabase/ui";
+import { useForm, Controller } from "react-hook-form";
+import toast from "react-hot-toast";
+
+import { supabase } from "src/libs/supabase";
 
 type formData = {
   email: string;
   password: string;
 };
 
-const Signin = () => {
+export default function Signin(){
   const { replace } = useRouter();
   const session = supabase.auth.session();
   const {
@@ -19,13 +20,21 @@ const Signin = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
   const runSignin = async ({ email, password }: formData) => {
     const res = await supabase.auth.signIn({
       email,
       password,
     });
+    console.log(res);
+    
+    res?.error && replace("/");
+    res.error && toast.error("ログインに失敗しました！");
+    
   };
+
   useEffect(() => {
+    //サインインしていればトップページへ遷移
     session && replace("/");
   }, [session]);
 
@@ -92,4 +101,3 @@ const Signin = () => {
   );
 };
 
-export default Signin;

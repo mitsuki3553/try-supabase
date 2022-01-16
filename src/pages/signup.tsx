@@ -1,18 +1,17 @@
-import { Button, IconKey, IconMail } from "@supabase/ui";
-import { useForm, Controller } from "react-hook-form";
-import { Input } from "@supabase/ui";
-import { supabase } from "src/libs/supabase";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useForm, Controller } from "react-hook-form";
+import { Button, IconKey, IconMail, Input } from "@supabase/ui";
+
+import { supabase } from "src/libs/supabase";
 
 type formData = {
   email: string;
   password: string;
 };
 
-const Signup = () => {
-
+export default function Signup(){
   const {
     control,
     handleSubmit,
@@ -115,4 +114,3 @@ const Signup = () => {
   );
 };
 
-export default Signup;
