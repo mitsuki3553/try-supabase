@@ -62,7 +62,6 @@ export default function Home() {
     }
   }, [session]);
 
-
   return (
     <LayoutWrapper>
       <div className="h-screen flex center items-center justify-center">
@@ -89,11 +88,13 @@ export default function Home() {
                 <div key={post.post_id} className="border mt-2 bg-purple-200">
                   <p className="bg-purple-100 rounded p-4">{post.posts}</p>
 
-                <div className="flex justify-between px-4">
-                  <p className="font-bold">{post.profiles.username}</p>
-                  <p className="text-right ml-auto">{convertDate(post.created_at)}</p>
-                </div>
-                    <Button>コメント</Button>
+                  <div className="flex justify-between px-4">
+                    <p className="font-bold">{post.profiles.username}</p>
+                    <p className="text-right ml-auto">
+                      {convertDate(post.created_at)}
+                    </p>
+                  </div>
+                  <Button>コメント</Button>
                 </div>
               );
             })}

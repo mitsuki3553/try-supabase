@@ -17,9 +17,8 @@ export const LayoutWrapper = (props: Props) => {
       >
         <Header />
         <main>
-          
           {/* <div className="px-4 text-gray-600 bg-gray-100"> */}
-            <Tabs>{props.children}</Tabs>
+          <Tabs>{props.children}</Tabs>
           {/* </div> */}
         </main>
         <Footer />

@@ -11,7 +11,7 @@ type formData = {
   password: string;
 };
 
-export default function Signup(){
+export default function Signup() {
   const {
     control,
     handleSubmit,
@@ -112,5 +112,4 @@ export default function Signup(){
       </div>
     </div>
   );
-};
-
+}

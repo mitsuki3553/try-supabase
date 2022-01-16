@@ -3,11 +3,11 @@ import { ReactNode } from "react";
 
 type Props = {
   children: ReactNode;
-}
+};
 
-export const Tabs =(props:Props) => {
+export const Tabs = (props: Props) => {
   return (
-    <Tab.Group >
+    <Tab.Group>
       <Tab.List>
         <Tab>全体</Tab>
         <Tab>個人</Tab>
@@ -21,4 +21,4 @@ export const Tabs =(props:Props) => {
       </Tab.Panels>
     </Tab.Group>
   );
-}
+};

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { Input,Button, IconKey, IconMail } from "@supabase/ui";
+import { Input, Button, IconKey, IconMail } from "@supabase/ui";
 import { useForm, Controller } from "react-hook-form";
 import toast from "react-hot-toast";
 
@@ -12,7 +12,7 @@ type formData = {
   password: string;
 };
 
-export default function Signin(){
+export default function Signin() {
   const { replace } = useRouter();
   const session = supabase.auth.session();
   const {
@@ -27,10 +27,9 @@ export default function Signin(){
       password,
     });
     console.log(res);
-    
+
     res?.error && replace("/");
     res.error && toast.error("ログインに失敗しました！");
-    
   };
 
   useEffect(() => {
@@ -99,5 +98,4 @@ export default function Signin(){
       </div>
     </div>
   );
-};
-
+}
