@@ -1,10 +1,10 @@
-import { LayoutWrapper } from "src/components/layouts/layoutWrapper";
-import { Public } from "src/components/public";
+import { LayoutWrapper } from "src/components/molecules/layouts/layoutWrapper";
+import { Public } from "src/components/organisms/public";
 
 export default function Home() {
   return (
     <LayoutWrapper>
-      <Public/>
+      <Public />
     </LayoutWrapper>
   );
 }

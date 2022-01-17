@@ -10,7 +10,7 @@ import {
   getProfile,
   postPost,
 } from "src/components/functions/supabase";
-import { InputProfile } from "src/components/modal_contents/input_profile";
+import { InputProfile } from "src/components/molecules/modal_contents/input_profile";
 
 type Props = {
   children: ReactNode;
@@ -107,7 +107,8 @@ export const Public = () => {
                     {convertDate(post.created_at)}
                   </p>
                 </div>
-                <Button>コメント</Button>
+                <Button onClick={()=>console.log("aaa")
+                }>コメント</Button>
                 {post.user_id === session!.user!.id && (
                   <Button
                     onClick={() => {

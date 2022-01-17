@@ -3,7 +3,7 @@ import { useForm, UseFormRegisterReturn } from "react-hook-form";
 import toast from "react-hot-toast";
 
 import { supabase } from "src/libs/supabase";
-import { Modal } from "src/components/headless_ui/modal";
+import { Modal } from "src/components/molecules/headless_ui/modal";
 
 const insertProfile = async (username: string, uuid: string) => {
   const { error } = await supabase

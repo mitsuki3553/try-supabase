@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
-import { Footer } from "src/components/layouts/footer";
-import { Header } from "src/components/layouts/header";
+import { Footer } from "src/components/molecules/layouts/footer";
+import { Header } from "src/components/molecules/layouts/header";
 import { Tabs } from "../headless_ui/tabs";
 // import { Tabs } from "src/components/headless_ui/tabs";
 type Props = {
