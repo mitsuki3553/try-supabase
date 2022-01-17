@@ -1,19 +1,8 @@
 import { useCallback, useState } from "react";
 import { useForm, UseFormRegisterReturn } from "react-hook-form";
-import toast from "react-hot-toast";
 
-import { supabase } from "src/libs/supabase";
 import { Modal } from "src/components/molecules/headless_ui/modal";
-
-const insertProfile = async (username: string, uuid: string) => {
-  const { error } = await supabase
-    .from("profiles")
-    .insert([{ username, id: uuid, created_at: new Date() }]);
-
-  if (error) {
-    toast.error(error.message);
-  }
-};
+import {insertProfile} from "src/components/functions/supabase"
 
 type Props = {
   uuid: string;
