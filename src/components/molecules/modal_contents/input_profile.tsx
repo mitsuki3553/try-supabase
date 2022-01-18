@@ -2,7 +2,7 @@ import { useCallback, useState } from "react";
 import { useForm, UseFormRegisterReturn } from "react-hook-form";
 
 import { Modal } from "src/components/molecules/headless_ui/modal";
-import {insertProfile} from "src/components/functions/supabase"
+import { insertProfile } from "src/components/functions/supabase";
 
 type Props = {
   uuid: string;

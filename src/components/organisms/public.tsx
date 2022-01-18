@@ -8,7 +8,7 @@ import {
   deletePosts,
   getPosts,
   getProfile,
-  postPost,
+  insertPost,
 } from "src/components/functions/supabase";
 import { InputProfile } from "src/components/molecules/modal_contents/input_profile";
 import { InputComment } from "src/components/molecules/modal_contents/input_comment";
@@ -26,7 +26,7 @@ type Profile = {
 
 type PostsWithProfile = {
   user_id: string;
-  post_id: string;
+  post_id: number;
   posts: string;
   created_at: string;
   updated_at: string;
@@ -66,7 +66,7 @@ export const Public = () => {
   //投稿したときの処理
   const handlePost = async (data: { post: string }) => {
     setIsLoading(true);
-    await postPost(data.post, session?.user?.id!);
+    await insertPost(data.post, session?.user?.id!);
     const posts = await getPosts();
     posts && setPosts(posts.reverse());
     setValue("post", "");
@@ -74,7 +74,7 @@ export const Public = () => {
   };
 
   //削除したときの処理
-  const handleDelete = async (user_id: string, post_id: string) => {
+  const handleDelete = async (user_id: string, post_id: number) => {
     setIsLoading(true);
     await deletePosts(user_id, post_id);
     const posts = await getPosts();
@@ -108,7 +108,7 @@ export const Public = () => {
                     {convertDate(post.created_at)}
                   </p>
                 </div>
-                <InputComment uuid={session?.user?.id!} />
+                <InputComment uuid={session?.user?.id!} postId={post.post_id} />
                 {post.user_id === session!.user!.id && (
                   <Button
                     onClick={() => {
