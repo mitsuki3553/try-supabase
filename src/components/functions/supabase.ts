@@ -10,7 +10,7 @@ type Profile = {
 
 type PostsWithProfile = {
   user_id: string;
-  post_id: string;
+  post_id: number;
   posts: string;
   created_at: string;
   updated_at: string;
@@ -40,6 +40,7 @@ export const getPosts = async () => {
   if (!error && data) {
     return data;
   }
+  console.error(error);
   error && toast.error("情報取得に失敗しました…");
   return null;
 };
@@ -55,8 +56,8 @@ export const insertProfile = async (username: string, uuid: string) => {
   }
 };
 
-//投稿をPOSTする
-export const postPost = async (post: string, uuid: string) => {
+//投稿をInsertする
+export const insertPost = async (post: string, uuid: string) => {
   const { error } = await supabase.from("post_table").insert([
     {
       user_id: uuid,
@@ -70,8 +71,29 @@ export const postPost = async (post: string, uuid: string) => {
   error ? toast.error("保存に失敗しました…") : toast("保存しました！！");
 };
 
+//コメントをInsertする
+export const insertComment = async (
+  uuid: string,
+  postId: number,
+  comment: string
+) => {
+  const { error } = await supabase.from("comment_table").insert([
+    {
+      comment_user_id: uuid,
+      post_id: postId,
+      created_at: new Date(),
+      updated_at: new Date(),
+      comment,
+    },
+  ]);
+
+  if (error) {
+    toast.error(error.message);
+  }
+};
+
 //投稿をdeleteする
-export const deletePosts = async (user_id: string, post_id: string) => {
+export const deletePosts = async (user_id: string, post_id: number) => {
   const { data, error } = await supabase
     .from("post_table")
     .delete()
