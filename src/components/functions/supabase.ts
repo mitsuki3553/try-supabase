@@ -45,6 +45,21 @@ export const getPosts = async () => {
   return null;
 };
 
+//コメント数をGETする
+export const getCommentsCount = async (postId: number) => {
+  const { error, count } = await supabase
+    .from("comment_table")
+    .select("count", { count: "exact" })
+    .eq("post_id", postId);
+
+  if ((!error && count) || count === 0) {
+    return { comment_count: count };
+  }
+  console.error(error);
+  toast.error("情報取得に失敗しました…");
+  return { comment_count: -1 };
+};
+
 //ユーザー情報をInsertする
 export const insertProfile = async (username: string, uuid: string) => {
   const { error } = await supabase

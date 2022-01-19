@@ -1,22 +1,18 @@
 import { Button } from "@supabase/ui";
 import { useRouter } from "next/router";
-import { ReactNode, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "src/libs/supabase";
 import { convertDate } from "src/components/functions/convertDate";
 import {
   deletePosts,
+  getCommentsCount,
   getPosts,
   getProfile,
   insertPost,
 } from "src/components/functions/supabase";
 import { InputProfile } from "src/components/molecules/modal_contents/input_profile";
 import { InputComment } from "src/components/molecules/modal_contents/input_comment";
-import toast from "react-hot-toast";
-
-type Props = {
-  children: ReactNode;
-};
 
 type Profile = {
   avatar_url: string;
@@ -37,21 +33,6 @@ type PostsWithProfile = {
 
 type comment = {
   comment_count: number;
-}
-
-
-const getCommentsCount = async (postId: number) => {
-  const { error,count } = await supabase
-    .from("comment_table")
-    .select("count", { count: "exact" })
-    .eq( "post_id", postId );
-    
-  if ((!error && count) || count === 0) {
-    return { comment_count: count };
-  }
-    console.error(error);
-    toast.error("情報取得に失敗しました…");
-    return { comment_count: -1 };  
 };
 
 export const Public = () => {
@@ -64,7 +45,7 @@ export const Public = () => {
 
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
   const [posts, setPosts] = useState<
-    (PostsWithProfile & comment )[] | undefined
+    (PostsWithProfile & comment)[] | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -72,17 +53,8 @@ export const Public = () => {
     if (session) {
       const fetchData = async () => {
         const fetchedProfile = await getProfile(session.user!.id);
-        const posts = await getPosts();
-        const postsCount = await Promise.all(
-          posts!.map(async (item) => {
-            const count = await getCommentsCount(item.post_id);
-            return { ...item, ...count };
-          })
-        );
-
-        posts && setPosts(postsCount?.reverse());
+        await commonFetch();
         setProfile(fetchedProfile?.shift());
-        setIsLoading(false);
       };
       fetchData();
     } else {
@@ -96,22 +68,18 @@ export const Public = () => {
   const handlePost = async (data: { post: string }) => {
     setIsLoading(true);
     await insertPost(data.post, session?.user?.id!);
-    const posts = await getPosts();
-    const postsCount = await Promise.all(
-      posts!.map(async (item) => {
-        const count = await getCommentsCount(item.post_id);
-        return { ...item, ...count };
-      })
-    );
-    posts && setPosts(postsCount.reverse());
+    await commonFetch();
     setValue("post", "");
-    setIsLoading(false);
   };
 
   //削除したときの処理
   const handleDelete = async (user_id: string, post_id: number) => {
     setIsLoading(true);
     await deletePosts(user_id, post_id);
+    await commonFetch();
+  };
+
+  const commonFetch = async () => {
     const posts = await getPosts();
     const postsCount = await Promise.all(
       posts!.map(async (item) => {
@@ -120,20 +88,19 @@ export const Public = () => {
       })
     );
     posts && setPosts(postsCount.reverse());
-
     setIsLoading(false);
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center mt-16">
       <div className="sm:max-w-xl bg-white  w-full sm:rounded-lg p-5 shadow">
         <form className="mt-2" onSubmit={handleSubmit(handlePost)}>
           <textarea
             placeholder="ここから投稿してね！"
-            className="w-full"
+            className="w-full border-2 rounded-lg"
             {...register("post", { required: true })}
           />
-          <Button role="submit" block>
+          <Button role="submit" block loading={isLoading}>
             投稿！
           </Button>
         </form>
@@ -141,15 +108,14 @@ export const Public = () => {
           {posts?.map((post) => {
             return (
               <div key={post.post_id} className="border mt-2 bg-purple-200">
-                  <p className="font-bold">{post.profiles.username}</p>
-                  <p className="text-right ml-auto">
-                    {convertDate(post.created_at)}
-                  </p>
+                <p className="font-bold">{post.profiles.username}</p>
+                <p className="text-right ml-auto">
+                  {convertDate(post.created_at)}
+                </p>
                 <p className="bg-purple-100 rounded p-4">{post.posts}</p>
                 <p>コメント数：{post.comment_count}</p>
 
-                <div className="flex justify-between px-4">
-                </div>
+                <div className="flex justify-between px-4"></div>
                 <InputComment uuid={session?.user?.id!} postId={post.post_id} />
                 {post.user_id === session!.user!.id && (
                   <Button
@@ -167,16 +133,6 @@ export const Public = () => {
           })}
         </div>
         {!isLoading && !profile && <InputProfile uuid={session?.user?.id!} />}
-
-        <Button
-          block
-          onClick={() => {
-            supabase.auth.signOut();
-            replace("/");
-          }}
-        >
-          サインアウト
-        </Button>
       </div>
     </div>
   );
