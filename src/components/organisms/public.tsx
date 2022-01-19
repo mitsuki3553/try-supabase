@@ -12,6 +12,7 @@ import {
 } from "src/components/functions/supabase";
 import { InputProfile } from "src/components/molecules/modal_contents/input_profile";
 import { InputComment } from "src/components/molecules/modal_contents/input_comment";
+import toast from "react-hot-toast";
 
 type Props = {
   children: ReactNode;
@@ -34,6 +35,25 @@ type PostsWithProfile = {
   profiles: Profile;
 };
 
+type comment = {
+  comment_count: number;
+}
+
+
+const getCommentsCount = async (postId: number) => {
+  const { error,count } = await supabase
+    .from("comment_table")
+    .select("count", { count: "exact" })
+    .eq( "post_id", postId );
+    
+  if ((!error && count) || count === 0) {
+    return { comment_count: count };
+  }
+    console.error(error);
+    toast.error("情報取得に失敗しました…");
+    return { comment_count: -1 };  
+};
+
 export const Public = () => {
   const session = supabase.auth.session();
   const { replace } = useRouter();
@@ -43,7 +63,9 @@ export const Public = () => {
   });
 
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
-  const [posts, setPosts] = useState<PostsWithProfile[] | null>(null);
+  const [posts, setPosts] = useState<
+    (PostsWithProfile & comment )[] | undefined
+  >(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -51,7 +73,14 @@ export const Public = () => {
       const fetchData = async () => {
         const fetchedProfile = await getProfile(session.user!.id);
         const posts = await getPosts();
-        posts && setPosts(posts.reverse());
+        const postsCount = await Promise.all(
+          posts!.map(async (item) => {
+            const count = await getCommentsCount(item.post_id);
+            return { ...item, ...count };
+          })
+        );
+
+        posts && setPosts(postsCount?.reverse());
         setProfile(fetchedProfile?.shift());
         setIsLoading(false);
       };
@@ -68,7 +97,13 @@ export const Public = () => {
     setIsLoading(true);
     await insertPost(data.post, session?.user?.id!);
     const posts = await getPosts();
-    posts && setPosts(posts.reverse());
+    const postsCount = await Promise.all(
+      posts!.map(async (item) => {
+        const count = await getCommentsCount(item.post_id);
+        return { ...item, ...count };
+      })
+    );
+    posts && setPosts(postsCount.reverse());
     setValue("post", "");
     setIsLoading(false);
   };
@@ -78,7 +113,13 @@ export const Public = () => {
     setIsLoading(true);
     await deletePosts(user_id, post_id);
     const posts = await getPosts();
-    posts && setPosts(posts.reverse());
+    const postsCount = await Promise.all(
+      posts!.map(async (item) => {
+        const count = await getCommentsCount(item.post_id);
+        return { ...item, ...count };
+      })
+    );
+    posts && setPosts(postsCount.reverse());
 
     setIsLoading(false);
   };
@@ -100,13 +141,14 @@ export const Public = () => {
           {posts?.map((post) => {
             return (
               <div key={post.post_id} className="border mt-2 bg-purple-200">
-                <p className="bg-purple-100 rounded p-4">{post.posts}</p>
-
-                <div className="flex justify-between px-4">
                   <p className="font-bold">{post.profiles.username}</p>
                   <p className="text-right ml-auto">
                     {convertDate(post.created_at)}
                   </p>
+                <p className="bg-purple-100 rounded p-4">{post.posts}</p>
+                <p>コメント数：{post.comment_count}</p>
+
+                <div className="flex justify-between px-4">
                 </div>
                 <InputComment uuid={session?.user?.id!} postId={post.post_id} />
                 {post.user_id === session!.user!.id && (
