@@ -112,7 +112,12 @@ export const Public = () => {
                 <p className="text-right ml-auto mr-2">
                   {convertDate(post.created_at)}
                 </p>
-                <CommentModal post={post.posts} postId={post.post_id} userName={post.profiles.username}/>
+                <CommentModal
+                  post={post.posts}
+                  postId={post.post_id}
+                  userName={post.profiles.username}
+                  commentCount={post.comment_count}
+                />
                 <p className="cursor-pointer">
                   コメント数：{post.comment_count}
                 </p>
@@ -147,56 +152,68 @@ type Props = {
   post: string;
   postId: number;
   userName: string;
+  commentCount: number;
 };
 
 const noUser = {
   avatar_url: "",
   id: "",
   updated_at: "",
-  username: "NoName"
-}
+  username: "NoName",
+};
 
 type CommentsWithProfiles = {
-  profile:Profile;
-} & Comment
+  profile: Profile;
+} & Comment;
 
 const CommentModal = (props: Props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [comments, setComments] = useState<CommentsWithProfiles[] | undefined>(undefined);
+  const [comments, setComments] = useState<CommentsWithProfiles[] | undefined>(
+    undefined
+  );
 
   const closeModal = useCallback(() => setIsOpen(false), []);
+
+  const handleGetComments = async () => {
+    const comments = await getComments(props.postId);
+    if (comments) {
+      const commentsWithProfiles = await Promise.all(
+        comments.map(async (comment) => {
+          const profileArr = await getProfile(comment.comment_user_id);
+          const profile =
+            profileArr && profileArr.length ? profileArr[0] : noUser;
+          return profile && { ...comment, profile: profile };
+        })
+      );
+      setComments(commentsWithProfiles);
+    }
+    setIsOpen(true);
+  };
 
   return (
     <>
       <p
-        className="bg-purple-100 rounded p-4 cursor-pointer"
-        onClick={async () => {
-          const comments = await getComments(props.postId);
-          if(comments){
-            const commentsWithProfiles =   await Promise.all(
-              comments.map(async(comment)=>{
-              const profileArr = await getProfile(comment.comment_user_id) ;
-              const profile = (profileArr && profileArr.length) ? profileArr[0] : noUser;
-              return profile && {...comment,profile:profile}  
-            }))
-            setComments(commentsWithProfiles);
-          }          
-          setIsOpen(true);
-        }}
+        className={
+          props.commentCount
+            ? `bg-purple-100 rounded p-4 cursor-pointer`
+            : `bg-purple-100 rounded p-4`
+        }
+        onClick={props.commentCount ? handleGetComments : () => {}}
       >
         {props.post}
       </p>
       <Modal isOpen={isOpen} closeModal={closeModal} title="Comment">
         {comments?.map((comment) => {
           return (
-            <div key={comment.comment_id} className="m-4 bg-green-100 rounded-sm">
+            <div
+              key={comment.comment_id}
+              className="m-4 bg-green-100 rounded-sm"
+            >
               <div className="flex justify-between px-4">
                 <div>{comment.profile.username}</div>
                 <div>{convertDate(comment.created_at)}</div>
               </div>
-              <p className="bg-purple-100 rounded p-4">
-                {comment.comment}
-              </p>
+              <p className="bg-purple-100 rounded p-4">{comment.comment}</p>
             </div>
           );
         })}
