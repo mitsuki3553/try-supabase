@@ -31,7 +31,7 @@ type PostsWithProfile = {
   profiles: Profile;
 };
 
-type comment = {
+type CommentCount = {
   comment_count: number;
 };
 
@@ -45,7 +45,7 @@ export const Public = () => {
 
   const [profile, setProfile] = useState<Profile | undefined>(undefined);
   const [posts, setPosts] = useState<
-    (PostsWithProfile & comment)[] | undefined
+    (PostsWithProfile & CommentCount)[] | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -87,7 +87,7 @@ export const Public = () => {
         return { ...item, ...count };
       })
     );
-    posts && setPosts(postsCount.reverse());
+    postsCount && setPosts(postsCount.reverse());
     setIsLoading(false);
   };
 
@@ -108,12 +108,14 @@ export const Public = () => {
           {posts?.map((post) => {
             return (
               <div key={post.post_id} className="border mt-2 bg-purple-200">
-                <p className="font-bold">{post.profiles.username}</p>
-                <p className="text-right ml-auto">
+                <p className="font-bold mx-2">{post.profiles.username}</p>
+                <p className="text-right ml-auto mr-2">
                   {convertDate(post.created_at)}
                 </p>
-                <p className="bg-purple-100 rounded p-4">{post.posts}</p>
-                <p>コメント数：{post.comment_count}</p>
+                <CommentModal post={post.posts} postId={post.post_id} userName={post.profiles.username}/>
+                <p className="cursor-pointer">
+                  コメント数：{post.comment_count}
+                </p>
 
                 <div className="flex justify-between px-4"></div>
                 <InputComment uuid={session?.user?.id!} postId={post.post_id} />
@@ -136,4 +138,96 @@ export const Public = () => {
       </div>
     </div>
   );
+};
+
+import { Modal } from "src/components/molecules/headless_ui/modal";
+import { useCallback } from "react";
+
+type Props = {
+  post: string;
+  postId: number;
+  userName: string;
+};
+
+const noUser = {
+  avatar_url: "",
+  id: "",
+  updated_at: "",
+  username: "NoName"
+}
+
+type CommentsWithProfiles = {
+  profile:Profile;
+} & Comment
+
+const CommentModal = (props: Props) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [comments, setComments] = useState<CommentsWithProfiles[] | undefined>(undefined);
+
+  const closeModal = useCallback(() => setIsOpen(false), []);
+
+  return (
+    <>
+      <p
+        className="bg-purple-100 rounded p-4 cursor-pointer"
+        onClick={async () => {
+          const comments = await getComments(props.postId);
+          if(comments){
+            const commentsWithProfiles =   await Promise.all(
+              comments.map(async(comment)=>{
+              const profileArr = await getProfile(comment.comment_user_id) ;
+              const profile = (profileArr && profileArr.length) ? profileArr[0] : noUser;
+              return profile && {...comment,profile:profile}  
+            }))
+            setComments(commentsWithProfiles);
+          }          
+          setIsOpen(true);
+        }}
+      >
+        {props.post}
+      </p>
+      <Modal isOpen={isOpen} closeModal={closeModal} title="Comment">
+        {comments?.map((comment) => {
+          return (
+            <div key={comment.comment_id} className="m-4 bg-green-100 rounded-sm">
+              <div className="flex justify-between px-4">
+                <div>{comment.profile.username}</div>
+                <div>{convertDate(comment.created_at)}</div>
+              </div>
+              <p className="bg-purple-100 rounded p-4">
+                {comment.comment}
+              </p>
+            </div>
+          );
+        })}
+        <Button onClick={closeModal}>閉じる</Button>
+      </Modal>
+    </>
+  );
+};
+
+//コメントをGETする
+export const getComments = async (id: number) => {
+  const { data, error } = await supabase
+    .from<Comment>("comment_table")
+    .select("*")
+    .eq("post_id", id);
+
+  if (!error && data) {
+    return data;
+  }
+
+  console.error(error);
+  // error && toast.error("情報取得に失敗しました…");
+  return null;
+};
+
+type Comment = {
+  comment_id: number;
+  comment_user_id: string;
+  post_id: number;
+  created_at: string;
+  updated_at: string;
+  comment: string;
+  profiles: Profile;
 };
