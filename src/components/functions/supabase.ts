@@ -28,6 +28,7 @@ export const getProfile = async (id: string) => {
   if (!error && data) {
     return data;
   }
+  console.error({getProfile:error});
   return null;
 };
 
@@ -40,8 +41,8 @@ export const getPosts = async () => {
   if (!error && data) {
     return data;
   }
-  console.error(error);
-  error && toast.error("情報取得に失敗しました…");
+  console.error({getPosts:error});
+  error && toast.error("投稿情報1の取得に失敗しました…");
   return null;
 };
 
@@ -55,8 +56,8 @@ export const getCommentsCount = async (postId: number) => {
   if ((!error && count) || count === 0) {
     return { comment_count: count };
   }
-  console.error(error);
-  toast.error("情報取得に失敗しました…");
+  console.error({getCoomentCount:error});
+  toast.error("投稿情報2の取得に失敗しました…");
   return { comment_count: -1 };
 };
 
@@ -67,7 +68,10 @@ export const insertProfile = async (username: string, uuid: string) => {
     .insert([{ username, id: uuid, created_at: new Date() }]);
 
   if (error) {
-    toast.error(error.message);
+    console.error({insertProfile:error});
+    toast.error("ユーザー情報の登録に失敗しました…");
+  }else{
+    toast.success("保存しました！");
   }
 };
 
@@ -83,8 +87,12 @@ export const insertPost = async (post: string, uuid: string) => {
     },
   ]);
 
-  error ? toast.error("保存に失敗しました…") : toast("保存しました！！");
-};
+  if (error) {
+    console.error({ insertPost: error });
+    toast.error("投稿に失敗しました…");
+  } else {
+    toast.success("投稿しました！");
+  }};
 
 //コメントをInsertする
 export const insertComment = async (
@@ -102,9 +110,12 @@ export const insertComment = async (
     },
   ]);
 
-  if (error) {
-    toast.error(error.message);
-  }
+    if (error) {
+      console.error({ insertComment: error });
+      toast.error("コメントに失敗しました…");
+    } else {
+      toast.success("コメントしました！");
+    }
 };
 
 //投稿をdeleteする
@@ -114,5 +125,10 @@ export const deletePosts = async (user_id: string, post_id: number) => {
     .delete()
     .match({ user_id: user_id, post_id: post_id });
 
-  error ? toast.error("削除に失敗しました…") : toast("削除しました！！");
+    if (error) {
+      console.error({ insertComment: error });
+      toast.error("投稿の削除に失敗しました…");
+    } else {
+      toast.success("投稿を削除しました！");
+    }  
 };
