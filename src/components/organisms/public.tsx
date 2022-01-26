@@ -118,13 +118,15 @@ export const Public = () => {
                   userName={post.profiles.username}
                   commentCount={post.comment_count}
                 />
-                <p className="cursor-pointer">
+                <p className={post.comment_count ? "cursor-pointer" : ""}>
                   コメント数：{post.comment_count}
                 </p>
 
                 <div className="flex justify-between px-4"></div>
-                <InputComment uuid={session?.user?.id!} postId={post.post_id} />
-                {post.user_id === session!.user!.id && (
+                {session?.user?.id && (
+                  <InputComment uuid={session.user.id} postId={post.post_id} />
+                )}
+                {post.user_id === session?.user?.id && (
                   <Button
                     onClick={() => {
                       handleDelete(post.user_id, post.post_id);
